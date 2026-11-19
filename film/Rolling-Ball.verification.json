@@ -1,0 +1,15 @@
+{
+  "file": "film/Rolling-Ball.mp4",
+  "duration_seconds": 25.0,
+  "video_frames": 600,
+  "fps": 24,
+  "width": 1920,
+  "height": 1080,
+  "video_codec": "h264",
+  "pixel_format": "yuv420p",
+  "audio_codec": "aac",
+  "audio_channels": 2,
+  "audio_sample_rate": 48000,
+  "full_decode": "passed",
+  "file_bytes": 20111538
+}

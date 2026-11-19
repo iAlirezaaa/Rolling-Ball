@@ -63,7 +63,5 @@
       "time": 16.96013,
       "duration": 0.85
     }
-  ],
-  "simulation_source": "data/simulation.json",
-  "event_synchronization": "PASS: all five domino contacts, bell strike and flag release use exported film seconds"
+  ]
 }
