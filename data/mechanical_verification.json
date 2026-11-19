@@ -1,0 +1,196 @@
+{
+  "status": "PASS",
+  "tests_run": 18,
+  "failures": 0,
+  "errors": 0,
+  "test_log": "test_bell_tab_physically_reaches_flag_pawl (test_causality.MechanicalSequence.test_bell_tab_physically_reaches_flag_pawl) ... ok\ntest_cord_and_gears_remain_mechanically_coupled (test_causality.MechanicalSequence.test_cord_and_gears_remain_mechanically_coupled) ... ok\ntest_crank_rod_and_hammer_lengths_do_not_change (test_causality.MechanicalSequence.test_crank_rod_and_hammer_lengths_do_not_change) ... ok\ntest_disconnecting_gear_stops_hammer_and_flag (test_causality.MechanicalSequence.test_disconnecting_gear_stops_hammer_and_flag) ... ok\ntest_dominoes_do_not_pass_through_neighbors (test_causality.MechanicalSequence.test_dominoes_do_not_pass_through_neighbors) ... ok\ntest_exact_film_length_and_sample_count (test_causality.MechanicalSequence.test_exact_film_length_and_sample_count) ... ok\ntest_exactly_five_dominoes_and_real_contacts (test_causality.MechanicalSequence.test_exactly_five_dominoes_and_real_contacts) ... ok\ntest_hammer_contacts_actual_bell_surface (test_causality.MechanicalSequence.test_hammer_contacts_actual_bell_surface) ... ok\ntest_holding_marble_stops_entire_machine (test_causality.MechanicalSequence.test_holding_marble_stops_entire_machine) ... ok\ntest_locked_bell_keeps_flag_latched (test_causality.MechanicalSequence.test_locked_bell_keeps_flag_latched) ... ok\ntest_locked_hammer_prevents_ring_and_flag (test_causality.MechanicalSequence.test_locked_hammer_prevents_ring_and_flag) ... ok\ntest_locking_counterweight_stops_drive (test_causality.MechanicalSequence.test_locking_counterweight_stops_drive) ... ok\ntest_no_marble_teleport_or_missing_roll (test_causality.MechanicalSequence.test_no_marble_teleport_or_missing_roll) ... ok\ntest_no_premature_movement (test_causality.MechanicalSequence.test_no_premature_movement) ... ok\ntest_removing_middle_domino_breaks_cascade (test_causality.MechanicalSequence.test_removing_middle_domino_breaks_cascade) ... ok\ntest_sear_is_physically_clear_before_weight_drops (test_causality.MechanicalSequence.test_sear_is_physically_clear_before_weight_drops) ... ok\ntest_six_stages_in_required_order (test_causality.MechanicalSequence.test_six_stages_in_required_order) ... ok\ntest_tangent_continuous_track_exit (test_causality.MechanicalSequence.test_tangent_continuous_track_exit) ... ok\n\n----------------------------------------------------------------------\nRan 18 tests in 2.842s\n\nOK\n",
+  "sample_count": 600,
+  "duration_seconds": 25.0,
+  "fps": 24,
+  "global_slow_motion_factor": 1.7785682525565425,
+  "events": [
+    {
+      "name": "ball_start",
+      "time": 0.0,
+      "physical_time": 0.0
+    },
+    {
+      "name": "domino_1_impact",
+      "time": 9.998518,
+      "physical_time": 5.621667,
+      "contact": [
+        -2.79,
+        -1.3,
+        1.31
+      ],
+      "impulse": 2.107904843903311,
+      "source": "marble"
+    },
+    {
+      "name": "domino_2_impact",
+      "time": 10.222321,
+      "physical_time": 5.7475,
+      "source": "domino_1",
+      "impulse": 0.21496034269557449,
+      "contact_height": 1.1826902118259546
+    },
+    {
+      "name": "domino_3_impact",
+      "time": 10.583963,
+      "physical_time": 5.950833,
+      "source": "domino_2",
+      "impulse": 0.1636204172845597,
+      "contact_height": 1.1820211060528907
+    },
+    {
+      "name": "domino_4_impact",
+      "time": 10.939677,
+      "physical_time": 6.150833,
+      "source": "domino_3",
+      "impulse": 0.17853859701604294,
+      "contact_height": 1.1826791597378565
+    },
+    {
+      "name": "domino_5_impact",
+      "time": 11.258337,
+      "physical_time": 6.33,
+      "source": "domino_4",
+      "impulse": 0.19466874857761526,
+      "contact_height": 1.1817573170143607
+    },
+    {
+      "name": "latch_release",
+      "time": 11.708908,
+      "physical_time": 6.583333,
+      "source": "domino_5",
+      "trip_angle": -0.17448508458883927,
+      "sear_tip_x": 2.3101984472511927,
+      "weight_right_edge": 2.31
+    },
+    {
+      "name": "gear_start",
+      "time": 11.708908,
+      "physical_time": 6.583333,
+      "source": "counterweight"
+    },
+    {
+      "name": "bell_strike",
+      "time": 16.685934,
+      "physical_time": 9.381667,
+      "source": "hammer",
+      "distance": 0.11976688614301485,
+      "hammer_head": [
+        5.160357522340395,
+        -0.65,
+        3.335457522868925
+      ],
+      "bell_contact": [
+        5.28,
+        -0.65,
+        3.3299999999999996
+      ],
+      "impulse": 0.07630331704332124
+    },
+    {
+      "name": "flag_release",
+      "time": 16.96013,
+      "physical_time": 9.535833,
+      "source": "bell_yoke_tab",
+      "tab_z": 4.230152881894731,
+      "pawl_z": 4.23,
+      "bell_swing": 0.09131390447179392
+    },
+    {
+      "name": "flag_settled",
+      "time": 17.889432,
+      "physical_time": 10.058333,
+      "source": "torsion_spring_and_stop"
+    },
+    {
+      "name": "gear_stop",
+      "time": 19.911072,
+      "physical_time": 11.195,
+      "source": "counterweight_end_stop"
+    }
+  ],
+  "measured_geometry": {
+    "max_ball_displacement_per_frame": 0.17297625525334373,
+    "max_rod_length_error": 5.551115123125783e-16,
+    "max_gear_constraint_error": 2.000000165480742e-07,
+    "minimum_hammer_bell_clearance": 0.11999999641613175,
+    "final_flag_angle": 1.57079633
+  },
+  "ablations": [
+    {
+      "disabled": "ball",
+      "events": [],
+      "final_flag_angle": 0.0
+    },
+    {
+      "disabled": "domino_3",
+      "events": [
+        "ball_start",
+        "domino_1_impact",
+        "domino_2_impact"
+      ],
+      "final_flag_angle": 0.0
+    },
+    {
+      "disabled": "counterweight",
+      "events": [
+        "ball_start",
+        "domino_1_impact",
+        "domino_2_impact",
+        "domino_3_impact",
+        "domino_4_impact",
+        "domino_5_impact"
+      ],
+      "final_flag_angle": 0.0
+    },
+    {
+      "disabled": "gear",
+      "events": [
+        "ball_start",
+        "domino_1_impact",
+        "domino_2_impact",
+        "domino_3_impact",
+        "domino_4_impact",
+        "domino_5_impact",
+        "latch_release",
+        "gear_start",
+        "gear_stop"
+      ],
+      "final_flag_angle": 0.0
+    },
+    {
+      "disabled": "hammer",
+      "events": [
+        "ball_start",
+        "domino_1_impact",
+        "domino_2_impact",
+        "domino_3_impact",
+        "domino_4_impact",
+        "domino_5_impact",
+        "latch_release",
+        "gear_start",
+        "gear_stop"
+      ],
+      "final_flag_angle": 0.0
+    },
+    {
+      "disabled": "bell",
+      "events": [
+        "ball_start",
+        "domino_1_impact",
+        "domino_2_impact",
+        "domino_3_impact",
+        "domino_4_impact",
+        "domino_5_impact",
+        "latch_release",
+        "gear_start",
+        "bell_strike"
+      ],
+      "final_flag_angle": 0.0
+    }
+  ]
+}

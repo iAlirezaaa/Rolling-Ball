@@ -1,0 +1,220 @@
+name: Render the 25-second film
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scene/**'
+      - 'src/**'
+      - 'data/**'
+      - '!data/audio-report.json'
+      - '.github/workflows/render-film.yml'
+  workflow_dispatch:
+
+# A newer source revision supersedes an unfinished older render.
+concurrency:
+  group: rolling-ball-film-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  BLENDER_VERSION: '4.3.2'
+  BLENDER_ARCHIVE: blender-4.3.2-linux-x64.tar.xz
+  BLENDER_SHA256: 4da1c956673c0485e63054e563ee69198cc8f80d8157dd7592dffc8a6a5592e6
+  BLENDER_CACHE_KEY: blender-official-4.3.2-linux-x64-4da1c956
+
+jobs:
+  verify:
+    name: Verify mechanics and prepare Blender
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify the complete causal chain
+        run: |
+          test -s scene/Rolling-Ball.blend
+          test -s data/simulation.json
+          python -m unittest discover -s tests -p 'test*.py' -v
+      - name: Cache official Blender including its CPU denoiser
+        id: blender-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/rolling-ball/blender-4.3.2-linux-x64
+          key: ${{ env.BLENDER_CACHE_KEY }}
+      - name: Download and verify official Blender
+        if: steps.blender-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.cache/rolling-ball"
+          curl --fail --location --retry 3 \
+            "https://download.blender.org/release/Blender4.3/$BLENDER_ARCHIVE" \
+            --output "$RUNNER_TEMP/$BLENDER_ARCHIVE"
+          printf '%s  %s\n' "$BLENDER_SHA256" "$RUNNER_TEMP/$BLENDER_ARCHIVE" | sha256sum --check --strict
+          tar -xJf "$RUNNER_TEMP/$BLENDER_ARCHIVE" -C "$HOME/.cache/rolling-ball"
+      - name: Check Blender executable
+        run: "$HOME/.cache/rolling-ball/blender-4.3.2-linux-x64/blender --version"
+
+  render:
+    name: Render chunk ${{ matrix.chunk }} / 20
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore official Blender
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/rolling-ball/blender-4.3.2-linux-x64
+          key: ${{ env.BLENDER_CACHE_KEY }}
+          fail-on-cache-miss: true
+      - name: Render 30 native Full HD frames
+        env:
+          CHUNK: ${{ matrix.chunk }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          first_frame=$((CHUNK * 30 + 1))
+          last_frame=$((first_frame + 29))
+          "$HOME/.cache/rolling-ball/blender-4.3.2-linux-x64/blender" \
+            --background scene/Rolling-Ball.blend --threads 4 \
+            --python-exit-code 1 --python src/render_frames.py -- \
+            --start "$first_frame" --end "$last_frame" \
+            --output build/frames --samples 32 --width 1920 --height 1080 --denoise
+      - name: Upload completed frame chunk
+        uses: actions/upload-artifact@v4
+        with:
+          name: frames-${{ matrix.chunk }}
+          path: build/frames/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 3
+
+  assemble:
+    name: Assemble, verify, and save the film
+    needs: [verify, render]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install assembly dependencies
+        run: |
+          python -m pip install --disable-pip-version-check numpy Pillow scipy
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Download all 20 completed chunks
+        uses: actions/download-artifact@v4
+        with:
+          pattern: frames-*
+          merge-multiple: true
+          path: build/frames
+      - name: Verify frame coverage, integrity, and native resolution
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          from PIL import Image
+          root = Path('build/frames')
+          expected = {f'frame_{i:04d}.png' for i in range(1, 601)}
+          actual = {p.name for p in root.glob('frame_*.png')}
+          assert actual == expected, f'Missing/extra frames: {expected ^ actual}'
+          manifests = sorted(root.glob('chunk_*.json'))
+          assert len(manifests) == 20, f'Expected 20 complete chunks, got {len(manifests)}'
+          covered = []
+          for manifest in manifests:
+              data = json.loads(manifest.read_text())
+              assert data['frame_count'] == 30
+              assert (data['width'], data['height'], data['fps']) == (1920, 1080, 24)
+              assert data['denoiser'] == 'OPENIMAGEDENOISE'
+              covered.extend(range(data['first_frame'], data['last_frame'] + 1))
+              for frame in data['frames']:
+                  path = root / frame['file']
+                  assert hashlib.sha256(path.read_bytes()).hexdigest() == frame['sha256'], path
+          assert sorted(covered) == list(range(1, 601)), 'Chunk overlap or missing range'
+          for filename in sorted(expected):
+              with Image.open(root / filename) as im:
+                  assert im.size == (1920, 1080), filename
+                  im.verify()
+          print('Verified 600 unique native 1920×1080 frames from 20 complete chunks.')
+          PY
+      - name: Create event-synchronised sound and encode the film
+        run: |
+          python src/audio.py --simulation data/simulation.json --output build/foley.wav
+          python src/encode.py --frames 'build/frames/frame_%04d.png' \
+            --audio build/foley.wav --output film/Rolling-Ball.mp4 \
+            --fps 24 --duration 25 --crf 18 --preset slow
+          cp build/foley.json data/audio-report.json
+      - name: Save opening and final stills
+        run: |
+          python - <<'PY'
+          from PIL import Image
+          for source, target in [('frame_0001.png', 'Poster.jpg'), ('frame_0600.png', 'Finale.jpg')]:
+              with Image.open('build/frames/' + source) as im:
+                  im.convert('RGB').save('film/' + target, quality=95, subsampling=0)
+          PY
+      - name: Preserve the verified film and reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rolling-Ball-1080p-25s
+          path: |
+            film/Rolling-Ball.mp4
+            film/Poster.jpg
+            film/Finale.jpg
+            film/Rolling-Ball.verification.json
+            data/audio-report.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+      - name: Save the completed film to main
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c rendered-film
+          git add -- film/Rolling-Ball.mp4 film/Poster.jpg film/Rolling-Ball.verification.json data/audio-report.json
+          if git diff --cached --quiet; then
+            echo 'The verified film is already current.'
+            exit 0
+          fi
+          git commit -m 'Render verified 25-second film in native 1080p'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if ! git diff --quiet "$GITHUB_SHA" origin/main -- scene src data/simulation.json .github/workflows/render-film.yml; then
+              echo '::warning::Newer film source exists on main; leaving this render in the downloadable artifact.'
+              exit 0
+            fi
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo '::warning::Output conflicts with a newer commit; the complete verified film remains available as an artifact.'
+              exit 0
+            fi
+            if git push origin HEAD:main; then
+              echo 'Saved the verified film to main.'
+              exit 0
+            fi
+          done
+          echo '::warning::Could not fast-forward main after three attempts. The film and verification reports remain available in the artifact.'

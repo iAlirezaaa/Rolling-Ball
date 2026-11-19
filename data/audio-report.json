@@ -1,0 +1,69 @@
+{
+  "duration_seconds": 25.0,
+  "sample_rate": 48000,
+  "channels": 2,
+  "peak_dbfs": -4.03526912315581,
+  "rms_dbfs": -28.65759278583523,
+  "clipped_samples": 0,
+  "seed": 42107,
+  "source": "Procedural Foley generated from simulation events; no music or external recordings",
+  "cues": [
+    {
+      "cue": "Steel marble rolling on brass rails",
+      "time": 0,
+      "duration": 9.9985
+    },
+    {
+      "cue": "Domino 1 contact",
+      "time": 9.998518,
+      "duration": 0.25
+    },
+    {
+      "cue": "Domino 2 contact",
+      "time": 10.222321,
+      "duration": 0.25
+    },
+    {
+      "cue": "Domino 3 contact",
+      "time": 10.583963,
+      "duration": 0.25
+    },
+    {
+      "cue": "Domino 4 contact",
+      "time": 10.939677,
+      "duration": 0.25
+    },
+    {
+      "cue": "Domino 5 contact",
+      "time": 11.258337,
+      "duration": 0.25
+    },
+    {
+      "cue": "Counterweight sear release",
+      "time": 11.708908,
+      "duration": 0.16
+    },
+    {
+      "cue": "Cord and meshing gears",
+      "time": 11.708908,
+      "duration": 8.202146
+    },
+    {
+      "cue": "Hammer impact and bronze bell decay",
+      "time": 16.685934,
+      "duration": 7.5
+    },
+    {
+      "cue": "Bell tab releases flag pawl",
+      "time": 16.96013,
+      "duration": 0.12
+    },
+    {
+      "cue": "Spring flag deployment and cloth rustle",
+      "time": 16.96013,
+      "duration": 0.85
+    }
+  ],
+  "simulation_source": "data/simulation.json",
+  "event_synchronization": "PASS: all five domino contacts, bell strike and flag release use exported film seconds"
+}

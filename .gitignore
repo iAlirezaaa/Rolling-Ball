@@ -1,0 +1,18 @@
+# Reproducible render intermediates and preview experiments
+/build/
+/preview/
+/preview_static.py
+
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Blender backup files; the final .blend is intentionally versioned
+*.blend1
+*.blend2
+
+# Local process logs and operating-system metadata
+*.log
+.DS_Store
